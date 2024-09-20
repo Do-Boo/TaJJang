@@ -35,6 +35,29 @@ class _SpeedTypingPracticeState extends State<SpeedTypingPractice> with SingleTi
     "Five quacking Zephyrs jolt my wax bed."
   ];
 
+  final List<String> _koreanSentences = [
+    "빠른 갈색 여우가 게으른 개를 뛰어넘습니다.",
+    "모든 국민은 인간으로서의 존엄과 가치를 가집니다.",
+    "세종대왕은 한글을 창제한 조선의 제4대 왕입니다.",
+    "우리나라의 국화는 무궁화입니다.",
+    "독도는 우리나라 동쪽 끝에 있는 아름다운 섬입니다.",
+    "한강은 서울을 가로지르는 큰 강입니다.",
+    "김치는 한국의 대표적인 발효 음식입니다.",
+    "태권도는 한국의 전통 무술입니다.",
+    "제주도는 한국의 가장 큰 섬입니다.",
+    "백두산은 한반도의 최고봉입니다.",
+    "불고기는 한국의 유명한 고기 요리입니다.",
+    "한복은 한국의 전통 의상입니다.",
+    "판소리는 한국의 전통 음악입니다.",
+    "남대문은 서울의 상징적인 건축물입니다.",
+    "bibimbap은 한국의 대표적인 비빔 요리입니다.",
+    "소나무는 우리나라의 대표적인 나무입니다.",
+    "한옥은 한국의 전통 가옥 양식입니다.",
+    "청와대는 대한민국 대통령의 집무실입니다.",
+    "광화문은 경복궁의 정문입니다.",
+    "남산타워는 서울의 랜드마크입니다.",
+  ];
+
   late String _currentSentence;
   late TextEditingController _controller;
   int _currentIndex = 0;
@@ -45,14 +68,14 @@ class _SpeedTypingPracticeState extends State<SpeedTypingPractice> with SingleTi
   DateTime? _startTime;
   Timer? _timer;
   late AnimationController _animationController;
-  bool _hasStarted = false;
+  bool _practiceStarted = false;
   bool _isFinished = false;
   Duration _elapsedTime = Duration.zero;
 
   @override
   void initState() {
     super.initState();
-    _currentSentence = _sentences[_currentIndex];
+    _currentSentence = _koreanSentences[_currentIndex];
     _controller = TextEditingController();
     _animationController = AnimationController(
       vsync: this,
@@ -68,10 +91,17 @@ class _SpeedTypingPracticeState extends State<SpeedTypingPractice> with SingleTi
     super.dispose();
   }
 
+  void _startPractice() {
+    if (!_practiceStarted) {
+      _practiceStarted = true;
+      _startTime = DateTime.now();
+      _startTimer();
+    }
+  }
+
   void _startTimer() {
-    _startTime = DateTime.now();
     _timer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
-      if (_hasStarted && !_isFinished) {
+      if (_practiceStarted && !_isFinished) {
         setState(() {
           _elapsedTime = DateTime.now().difference(_startTime!);
           _updateTypingSpeed();
@@ -81,19 +111,26 @@ class _SpeedTypingPracticeState extends State<SpeedTypingPractice> with SingleTi
   }
 
   void _updateTypingSpeed() {
-    final minutes = _elapsedTime.inMilliseconds / 60000;
-    if (minutes > 0) {
-      _typingSpeed = (_totalChars / minutes).round();
+    if (_startTime != null) {
+      final minutes = _elapsedTime.inMilliseconds / 60000;
+      if (minutes > 0) {
+        setState(() {
+          if (_totalChars > 0) {
+            _typingSpeed = (_totalChars / minutes).round();
+          } else {
+            _typingSpeed = 0; // 새 문장의 첫 글자가 입력되기 전에는 0으로 설정
+          }
+        });
+      }
     }
   }
 
   void _checkInput(String value) {
-    setState(() {
-      if (!_hasStarted && value.isNotEmpty) {
-        _hasStarted = true;
-        _startTimer();
-      }
+    if (!_practiceStarted) {
+      _startPractice();
+    }
 
+    setState(() {
       _correctChars = 0;
       _totalChars = value.length;
 
@@ -107,7 +144,7 @@ class _SpeedTypingPracticeState extends State<SpeedTypingPractice> with SingleTi
       _updateTypingSpeed();
       _animationController.forward(from: 0);
 
-      if (value.length > _currentSentence.length) {
+      if (value == _currentSentence) {
         _nextSentence();
       }
     });
@@ -115,15 +152,12 @@ class _SpeedTypingPracticeState extends State<SpeedTypingPractice> with SingleTi
 
   void _nextSentence() {
     if (_currentIndex < 19) {
-      // 20번째 문장까지만 진행
       setState(() {
         _currentIndex++;
-        _currentSentence = _sentences[_currentIndex];
+        _currentSentence = _koreanSentences[_currentIndex];
         _controller.clear();
         _correctChars = 0;
-        _totalChars = _currentSentence.length;
-        _hasStarted = false;
-        _typingSpeed = 0;
+        _totalChars = 0;
         _accuracy = 100.0;
       });
     } else {
@@ -134,6 +168,7 @@ class _SpeedTypingPracticeState extends State<SpeedTypingPractice> with SingleTi
   void _finishPractice() {
     setState(() {
       _isFinished = true;
+      _practiceStarted = false;
     });
     _timer?.cancel();
     // 여기에 결과 표시 로직을 추가하세요
@@ -142,25 +177,48 @@ class _SpeedTypingPracticeState extends State<SpeedTypingPractice> with SingleTi
   @override
   Widget build(BuildContext context) {
     return Container(
+      padding: const EdgeInsets.all(20), // 전체 패딩을 24에서 20으로 줄임
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFF4AA9DE).withOpacity(0.3), width: 2),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "Speed Typing Challenge (${_currentIndex + 1}/20)",
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF4AA9DE)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                "Speed Typing Challenge",
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF4AA9DE)), // 폰트 크기를 22에서 20으로 줄임
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4), // 패딩을 줄임
+                decoration: BoxDecoration(
+                  color: const Color(0xFF4AA9DE),
+                  borderRadius: BorderRadius.circular(12), // 모서리 반경을 15에서 12로 줄임
+                ),
+                child: Text(
+                  "${_currentIndex + 1}/20",
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white), // 폰트 크기를 16에서 14로 줄임
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12), // 16에서 12로 줄임
           Text(
             "Time: ${_formatDuration(_elapsedTime)}",
-            style: const TextStyle(fontSize: 18, color: Colors.black54),
+            style: const TextStyle(fontSize: 16, color: Colors.black54, fontWeight: FontWeight.w500), // 폰트 크기를 18에서 16으로 줄임
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16), // 24에서 16으로 줄임
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12), // 16에서 12로 줄임
             width: double.infinity,
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
+              color: Colors.grey[100],
+              borderRadius: BorderRadius.circular(10), // 12에서 10으로 줄임
+              border: Border.all(color: Colors.grey[300]!, width: 1),
             ),
             child: RichText(
               text: TextSpan(
@@ -169,28 +227,31 @@ class _SpeedTypingPracticeState extends State<SpeedTypingPractice> with SingleTi
               ),
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16), // 24에서 16으로 줄임
           TextField(
             controller: _controller,
             onChanged: _checkInput,
             onSubmitted: (_) => _nextSentence(),
             style: commonTextStyle,
             decoration: InputDecoration(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10), // 패딩을 줄임
               hintText: "Type here...",
               hintStyle: commonTextStyle.copyWith(color: Colors.grey),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: Colors.grey[100],
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(10), // 12에서 10으로 줄임
                 borderSide: BorderSide.none,
               ),
-              isDense: true,
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10), // 12에서 10으로 줄임
+                borderSide: const BorderSide(color: Color(0xFF4AA9DE), width: 2),
+              ),
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16), // 24에서 16으로 줄임
           _buildAnimatedGraph("Typing Speed", _typingSpeed.toDouble(), 300, const Color(0xFF4AA9DE)),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12), // 16에서 12로 줄임
           _buildAnimatedGraph("Accuracy", _accuracy, 100, const Color(0xFFFFB284)),
         ],
       ),
@@ -220,44 +281,42 @@ class _SpeedTypingPracticeState extends State<SpeedTypingPractice> with SingleTi
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 4),
-        Row(
+        Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black87)), // 폰트 크기를 16에서 14로 줄임
+        const SizedBox(height: 6), // 8에서 6으로 줄임
+        Stack(
           children: [
-            Expanded(
-              flex: 5,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                height: 20,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: FractionallySizedBox(
-                  alignment: Alignment.centerLeft,
-                  widthFactor: graphValue / maxGraphValue,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: color,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
+            Container(
+              height: 20, // 24에서 20으로 줄임
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(10), // 12에서 10으로 줄임
               ),
             ),
-            const SizedBox(width: 8),
-            Expanded(
-              flex: 1,
-              child: TweenAnimationBuilder<double>(
-                tween: Tween<double>(begin: value, end: currentValue),
-                duration: const Duration(milliseconds: 300),
-                builder: (context, value, child) {
-                  return Text(
-                    title == "Typing Speed" ? '${value.round()}' : '${value.toStringAsFixed(1)}%',
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.right,
-                  );
-                },
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              height: 20, // 24에서 20으로 줄임
+              width: (graphValue / maxGraphValue) * (MediaQuery.of(context).size.width - 40), // 48에서 40으로 줄임
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(10), // 12에서 10으로 줄임
+              ),
+            ),
+            Positioned.fill(
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 8.0), // 12에서 8로 줄임
+                  child: TweenAnimationBuilder<double>(
+                    tween: Tween<double>(begin: value, end: currentValue),
+                    duration: const Duration(milliseconds: 300),
+                    builder: (context, value, child) {
+                      return Text(
+                        title == "Typing Speed" ? '${value.round()} WPM' : '${value.toStringAsFixed(1)}%',
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white), // 폰트 크기를 14에서 12로 줄임
+                      );
+                    },
+                  ),
+                ),
               ),
             ),
           ],

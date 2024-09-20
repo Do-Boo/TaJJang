@@ -40,7 +40,7 @@ class _SpeedTypingPracticeState extends State<SpeedTypingPractice> with SingleTi
     "모든 국민은 인간으로서의 존엄과 가치를 가집니다.",
     "세종대왕은 한글을 창제한 조선의 제4대 왕입니다.",
     "우리나라의 국화는 무궁화입니다.",
-    "독도는 우리나라 동쪽 끝에 있는 아름다운 섬입니다.",
+    "독도는 우리나라 동쪽 끝에 있는 아름다 섬입니다.",
     "한강은 서울을 가로지르는 큰 강입니다.",
     "김치는 한국의 대표적인 발효 음식입니다.",
     "태권도는 한국의 전통 무술입니다.",
@@ -71,6 +71,8 @@ class _SpeedTypingPracticeState extends State<SpeedTypingPractice> with SingleTi
   bool _practiceStarted = false;
   bool _isFinished = false;
   Duration _elapsedTime = Duration.zero;
+  DateTime? _sentenceStartTime;
+  int _previousTypingSpeed = 0;
 
   @override
   void initState() {
@@ -81,6 +83,7 @@ class _SpeedTypingPracticeState extends State<SpeedTypingPractice> with SingleTi
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
+    _startPractice();
   }
 
   @override
@@ -92,11 +95,10 @@ class _SpeedTypingPracticeState extends State<SpeedTypingPractice> with SingleTi
   }
 
   void _startPractice() {
-    if (!_practiceStarted) {
-      _practiceStarted = true;
-      _startTime = DateTime.now();
-      _startTimer();
-    }
+    _practiceStarted = true;
+    _startTime = DateTime.now();
+    _sentenceStartTime = DateTime.now();
+    _startTimer();
   }
 
   void _startTimer() {
@@ -111,23 +113,23 @@ class _SpeedTypingPracticeState extends State<SpeedTypingPractice> with SingleTi
   }
 
   void _updateTypingSpeed() {
-    if (_startTime != null) {
-      final minutes = _elapsedTime.inMilliseconds / 60000;
+    if (_sentenceStartTime != null && _totalChars > 0) {
+      final sentenceElapsedTime = DateTime.now().difference(_sentenceStartTime!);
+      final minutes = sentenceElapsedTime.inMilliseconds / 60000;
       if (minutes > 0) {
         setState(() {
-          if (_totalChars > 0) {
-            _typingSpeed = (_totalChars / minutes).round();
-          } else {
-            _typingSpeed = 0; // 새 문장의 첫 글자가 입력되기 전에는 0으로 설정
-          }
+          _typingSpeed = (_totalChars / minutes).round();
         });
       }
     }
   }
 
   void _checkInput(String value) {
-    if (!_practiceStarted) {
-      _startPractice();
+    if (_totalChars == 0) {
+      _sentenceStartTime = DateTime.now();
+      setState(() {
+        _typingSpeed = _previousTypingSpeed;
+      });
     }
 
     setState(() {
@@ -144,7 +146,7 @@ class _SpeedTypingPracticeState extends State<SpeedTypingPractice> with SingleTi
       _updateTypingSpeed();
       _animationController.forward(from: 0);
 
-      if (value == _currentSentence) {
+      if (value.length > _currentSentence.length) {
         _nextSentence();
       }
     });
@@ -159,6 +161,8 @@ class _SpeedTypingPracticeState extends State<SpeedTypingPractice> with SingleTi
         _correctChars = 0;
         _totalChars = 0;
         _accuracy = 100.0;
+        _previousTypingSpeed = _typingSpeed; // 이전 문장의 타이핑 속도를 저장
+        _sentenceStartTime = null; // 새 문장을 위해 시작 시간 초기화
       });
     } else {
       _finishPractice();
@@ -208,7 +212,7 @@ class _SpeedTypingPracticeState extends State<SpeedTypingPractice> with SingleTi
           ),
           const SizedBox(height: 12), // 16에서 12로 줄임
           Text(
-            "Time: ${_formatDuration(_elapsedTime)}",
+            "Total Time: ${_formatDuration(_elapsedTime)}",
             style: const TextStyle(fontSize: 16, color: Colors.black54, fontWeight: FontWeight.w500), // 폰트 크기를 18에서 16으로 줄임
           ),
           const SizedBox(height: 16), // 24에서 16으로 줄임
@@ -306,15 +310,9 @@ class _SpeedTypingPracticeState extends State<SpeedTypingPractice> with SingleTi
                 alignment: Alignment.centerRight,
                 child: Padding(
                   padding: const EdgeInsets.only(right: 8.0), // 12에서 8로 줄임
-                  child: TweenAnimationBuilder<double>(
-                    tween: Tween<double>(begin: value, end: currentValue),
-                    duration: const Duration(milliseconds: 300),
-                    builder: (context, value, child) {
-                      return Text(
-                        title == "Typing Speed" ? '${value.round()} WPM' : '${value.toStringAsFixed(1)}%',
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white), // 폰트 크기를 14에서 12로 줄임
-                      );
-                    },
+                  child: Text(
+                    title == "Typing Speed" ? '$_typingSpeed WPM' : '${_accuracy.toStringAsFixed(1)}%',
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white), // 폰트 크기를 14에서 12로 줄임
                   ),
                 ),
               ),

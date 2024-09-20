@@ -24,7 +24,7 @@ class TaJJangHomePage extends StatelessWidget {
                     children: [
                       CustomAppBar(),
                       TabMenu(),
-                      Expanded(child: VirtualKeyboard()),
+                      VirtualKeyboard(),
                       FriendChallengeButton(),
                       ProfileSection(),
                       ChartArea(),

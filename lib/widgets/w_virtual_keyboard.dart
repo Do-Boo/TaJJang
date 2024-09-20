@@ -22,9 +22,9 @@ class _VirtualKeyboardState extends State<VirtualKeyboard> {
       ),
       child: Column(
         children: [
-          _buildKeyboardRow(['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P']),
+          _buildKeyboardRow(['ㅂ', 'ㅈ', 'ㄷ', 'ㄱ', 'ㅅ', 'ㅛ', 'ㅕ', 'ㅑ', 'ㅐ', 'ㅔ']),
           const SizedBox(height: 8),
-          _buildKeyboardRow(['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L']),
+          _buildKeyboardRow(['ㅁ', 'ㄴ', 'ㅇ', 'ㄹ', 'ㅎ', 'ㅗ', 'ㅓ', 'ㅏ', 'ㅣ']),
           const SizedBox(height: 8),
           _buildLastRow(),
           const SizedBox(height: 8),
@@ -58,7 +58,7 @@ class _VirtualKeyboardState extends State<VirtualKeyboard> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Expanded(child: SizedBox()),
-          ...['Z', 'X', 'C', 'V', 'B', 'N', 'M'].map((key) => AspectRatio(
+          ...['ㅋ', 'ㅌ', 'ㅊ', 'ㅍ', 'ㅠ', 'ㅜ', 'ㅡ'].map((key) => AspectRatio(
                 aspectRatio: 3 / 4,
                 child: _buildAnimatedKey(key),
               )),
@@ -69,12 +69,16 @@ class _VirtualKeyboardState extends State<VirtualKeyboard> {
   }
 
   Widget _buildSpaceRow() {
-    return Row(
-      children: [
-        Expanded(flex: 2, child: _buildAnimatedKey('Shift', isSpecial: true)),
-        Expanded(flex: 6, child: _buildAnimatedKey('Space')),
-        Expanded(flex: 2, child: _buildAnimatedKey('Enter', isSpecial: true)),
-      ],
+    return SizedBox(
+      height: 48,
+      width: double.infinity,
+      child: Row(
+        children: [
+          Expanded(flex: 2, child: _buildAnimatedKey('Shift', isSpecial: true)),
+          Expanded(flex: 6, child: _buildAnimatedKey('-')),
+          Expanded(flex: 2, child: _buildAnimatedKey('Enter', isSpecial: true)),
+        ],
+      ),
     );
   }
 
@@ -92,14 +96,14 @@ class _VirtualKeyboardState extends State<VirtualKeyboard> {
         decoration: BoxDecoration(
           color: color,
           borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              spreadRadius: isPressed ? 1 : 2,
-              blurRadius: isPressed ? 3 : 5,
-              offset: isPressed ? const Offset(0, 1) : const Offset(0, 3),
-            ),
-          ],
+          // boxShadow: [
+          //   BoxShadow(
+          //     color: Colors.black.withOpacity(0.2),
+          //     spreadRadius: isPressed ? 1 : 2,
+          //     blurRadius: isPressed ? 3 : 5,
+          //     offset: isPressed ? const Offset(0, 1) : const Offset(0, 3),
+          //   ),
+          // ],
         ),
         child: Center(
           child: Text(

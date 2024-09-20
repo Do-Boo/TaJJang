@@ -3,6 +3,7 @@ import 'package:tajjang/widgets/w_appbar.dart';
 import 'package:tajjang/widgets/w_chart_area.dart';
 import 'package:tajjang/widgets/w_friend_challenge_button.dart';
 import 'package:tajjang/widgets/w_profile_section.dart';
+import 'package:tajjang/widgets/w_speed_typing.dart';
 import 'package:tajjang/widgets/w_tab_menu.dart';
 import 'package:tajjang/widgets/w_virtual_keyboard.dart';
 
@@ -24,10 +25,11 @@ class TaJJangHomePage extends StatelessWidget {
                     children: [
                       CustomAppBar(),
                       TabMenu(),
-                      VirtualKeyboard(),
-                      FriendChallengeButton(),
-                      ProfileSection(),
-                      ChartArea(),
+                      SpeedTypingPractice(),
+                      // VirtualKeyboard(),
+                      // FriendChallengeButton(),
+                      // ProfileSection(),
+                      // ChartArea(),
                     ],
                   ),
                 ),

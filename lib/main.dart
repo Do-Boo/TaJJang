@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:tajjang/pages/p_homepage.dart';
 
 void main() {
+  // debugPaintSizeEnabled = true;
   runApp(const TaJJangApp());
 }
 

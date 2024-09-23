@@ -1,40 +1,35 @@
 import 'package:flutter/material.dart';
 
 class Button extends StatelessWidget {
-  final String text;
-  final VoidCallback onPressed;
-  final Color backgroundColor;
-  final Color textColor;
-  final double fontSize;
-  final bool isExpanded;
+  final Color? color;
+  final VoidCallback? onPressed;
+  final Widget? child;
+  final BorderRadius? borderRadius;
+  final Border? border;
+  final EdgeInsets? padding;
 
-  const Button({
-    super.key,
-    required this.text,
-    required this.onPressed,
-    this.backgroundColor = Colors.white,
-    this.textColor = Colors.black,
-    this.fontSize = 18,
-    this.isExpanded = false,
-  });
+  const Button({super.key, this.color, this.border, this.child, this.borderRadius, this.onPressed, this.padding});
 
   @override
   Widget build(BuildContext context) {
-    Widget button = ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        foregroundColor: textColor,
-        backgroundColor: backgroundColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        padding: EdgeInsets.zero,
+    return Material(
+      type: MaterialType.transparency,
+      child: Ink(
+        decoration: BoxDecoration(
+          color: color ?? Theme.of(context).primaryColor,
+          borderRadius: borderRadius ?? BorderRadius.circular(0),
+          border: border ?? const Border(),
+        ),
+        child: InkWell(
+          borderRadius: borderRadius ?? BorderRadius.circular(0),
+          onTap: onPressed,
+          child: Container(
+            padding: padding ?? const EdgeInsets.all(16),
+            alignment: Alignment.center,
+            child: child,
+          ),
+        ),
       ),
-      onPressed: onPressed,
-      child: Text(text, style: TextStyle(fontSize: fontSize)),
     );
-
-    if (isExpanded) {
-      return Expanded(child: Padding(padding: const EdgeInsets.all(2), child: button));
-    } else {
-      return Padding(padding: const EdgeInsets.all(2), child: button);
-    }
   }
 }

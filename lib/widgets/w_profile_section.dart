@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tajjang/widgets/w_button.dart';
+import 'package:tajjang/widgets/w_button1.dart';
 
 class ProfileSection extends StatelessWidget {
   const ProfileSection({super.key});
@@ -15,7 +15,7 @@ class ProfileSection extends StatelessWidget {
           const Expanded(
             child: Text('Speed Test', style: TextStyle(fontWeight: FontWeight.bold)),
           ),
-          Button(
+          Button1(
             text: 'Friend Challenge',
             onPressed: () => print('Friend Challenge pressed'),
             backgroundColor: const Color(0xFFFFB284),

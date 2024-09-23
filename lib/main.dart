@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:tajjang/pages/p_homepage.dart';
+import 'package:tajjang/pages/p_setting_page.dart';
+// import 'package:flutter/rendering.dart';
+// import 'package:tajjang/pages/p_homepage.dart';
+// import 'package:tajjang/pages/p_login_page.dart';
+// import 'package:tajjang/pages/p_main_page.dart';
+// import 'package:tajjang/pages/p_typing_test_launch_page.dart';
+// import 'package:tajjang/pages/p_word_typing_test_page.dart';
 
 void main() {
-  // debugPaintSizeEnabled = true;
   runApp(const TaJJangApp());
 }
 
@@ -12,13 +16,8 @@ class TaJJangApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'TaJJang',
-      theme: ThemeData(
-        primaryColor: const Color(0xFF4AA9DE),
-        colorScheme: ColorScheme.fromSwatch().copyWith(secondary: const Color(0xFFFFB284)),
-      ),
-      home: const TaJJangHomePage(),
+    return const MaterialApp(
+      home: SettingsPage(),
     );
   }
 }

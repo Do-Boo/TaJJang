@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:hugeicons/hugeicons.dart';
 import 'package:tajjang/widgets/w_button.dart';
 
 class LoginPage extends StatefulWidget {
@@ -16,43 +18,31 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color(0xFFF7FAFA),
+        backgroundColor: const Color(0xFFF8F6EE),
         title: const Text('TaJJang'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              // TODO: Implement settings functionality
-            },
+            icon: const HugeIcon(icon: HugeIcons.strokeRoundedSettings02, color: Colors.black, size: 32),
+            onPressed: () => Get.back(),
           ),
         ],
       ),
-      backgroundColor: const Color(0xFFF7FAFA),
+      backgroundColor: const Color(0xFFF8F6EE),
       body: SafeArea(
         child: SingleChildScrollView(
-          child: IntrinsicHeight(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _buildWelcomeText(),
-                        _buildInputField('Email/ID', _emailController),
-                        _buildInputField('Password', _passwordController, isPassword: true),
-                        _buildForgotPasswordText(),
-                        _buildButtons(),
-                        _buildSocialLoginText(),
-                        _buildSocialLoginButtons(),
-                      ],
-                    ),
-                  ),
-                ),
+                _buildWelcomeText(),
+                _buildInputField('Email/ID', _emailController),
+                _buildInputField('Password', _passwordController, isPassword: true),
+                _buildForgotPasswordText(),
+                _buildButtons(),
+                _buildSocialLoginText(),
+                _buildSocialLoginButtons(),
               ],
             ),
           ),
@@ -69,9 +59,7 @@ class _LoginPageState extends State<LoginPage> {
         textAlign: TextAlign.center,
         style: TextStyle(
           color: Color(0xFF21190A),
-          fontSize: 22,
-          fontFamily: 'Plus Jakarta Sans',
-          fontWeight: FontWeight.w700,
+          fontSize: 32,
         ),
       ),
     );
@@ -79,7 +67,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget _buildInputField(String hintText, TextEditingController controller, {bool isPassword = false}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Container(
         height: 56,
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -99,11 +87,12 @@ class _LoginPageState extends State<LoginPage> {
             hintText: hintText,
             hintStyle: const TextStyle(
               color: Color(0xFFD4DBE8),
-              fontSize: 16,
-              fontFamily: 'Plus Jakarta Sans',
-              fontWeight: FontWeight.w400,
+              fontSize: 18,
             ),
             border: InputBorder.none,
+          ),
+          style: const TextStyle(
+            fontSize: 18,
           ),
         ),
       ),
@@ -121,9 +110,7 @@ class _LoginPageState extends State<LoginPage> {
           'Forgot password?',
           style: TextStyle(
             color: Color(0xFF111416),
-            fontSize: 14,
-            fontFamily: 'Plus Jakarta Sans',
-            fontWeight: FontWeight.w400,
+            fontSize: 18,
           ),
         ),
       ),
@@ -152,9 +139,7 @@ class _LoginPageState extends State<LoginPage> {
           text,
           style: TextStyle(
             color: textColor,
-            fontSize: 14,
-            fontFamily: 'Plus Jakarta Sans',
-            fontWeight: FontWeight.w700,
+            fontSize: 18,
           ),
         ),
       ),
@@ -169,9 +154,7 @@ class _LoginPageState extends State<LoginPage> {
         textAlign: TextAlign.center,
         style: TextStyle(
           color: Color(0xFFA07C1C),
-          fontSize: 14,
-          fontFamily: 'Plus Jakarta Sans',
-          fontWeight: FontWeight.w400,
+          fontSize: 18,
         ),
       ),
     );
@@ -201,9 +184,7 @@ class _LoginPageState extends State<LoginPage> {
         text,
         style: const TextStyle(
           color: Color(0xFF21190A),
-          fontSize: 14,
-          fontFamily: 'Plus Jakarta Sans',
-          fontWeight: FontWeight.w500,
+          fontSize: 18,
         ),
       ),
     );

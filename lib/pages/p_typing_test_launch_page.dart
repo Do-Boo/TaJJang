@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:get/get.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:tajjang/widgets/w_button.dart';
 
@@ -17,7 +18,7 @@ class _TypingTestLaunchPageState extends State<TypingTestLaunchPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7FAFA),
+      backgroundColor: const Color(0xFFF8F6EE),
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
@@ -31,9 +32,7 @@ class _TypingTestLaunchPageState extends State<TypingTestLaunchPage> {
             ),
             leading: IconButton(
               icon: const HugeIcon(icon: HugeIcons.strokeRoundedArrowDown01, color: Colors.black, size: 32),
-              onPressed: () {
-                // TODO: Implement settings functionality
-              },
+              onPressed: () => Get.back(),
             ),
           ),
           SliverList(
@@ -41,7 +40,7 @@ class _TypingTestLaunchPageState extends State<TypingTestLaunchPage> {
               [
                 Container(
                   width: double.infinity,
-                  decoration: const BoxDecoration(color: Color(0xFFF7FAFA)),
+                  decoration: const BoxDecoration(color: Color(0xFFF8F6EE)),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -73,8 +72,6 @@ class _TypingTestLaunchPageState extends State<TypingTestLaunchPage> {
         style: TextStyle(
           color: Color(0xFF141C23),
           fontSize: 22,
-          fontFamily: 'Be Vietnam Pro',
-          fontWeight: FontWeight.w700,
         ),
       ),
     );
@@ -102,9 +99,7 @@ class _TypingTestLaunchPageState extends State<TypingTestLaunchPage> {
               '$value',
               style: TextStyle(
                 color: _selectedSentenceCount == value ? const Color(0xFF141C23) : const Color(0xFF93A5C6),
-                fontSize: 16,
-                fontFamily: 'Be Vietnam Pro',
-                fontWeight: FontWeight.w700,
+                fontSize: 18,
               ),
             ),
           );
@@ -121,17 +116,13 @@ class _TypingTestLaunchPageState extends State<TypingTestLaunchPage> {
         color: const Color(0xFFF4C654),
         borderRadius: BorderRadius.circular(24),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-        onPressed: () {
-          // TODO: Implement start typing functionality
-        },
+        onPressed: () => Get.toNamed('/word_typing_test'),
         child: const Text(
           'Start typing',
           textAlign: TextAlign.center,
           style: TextStyle(
             color: Color(0xFF141C23),
-            fontSize: 16,
-            fontFamily: 'Be Vietnam Pro',
-            fontWeight: FontWeight.w700,
+            fontSize: 18,
           ),
         ),
       ),

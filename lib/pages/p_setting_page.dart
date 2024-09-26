@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:tajjang/widgets/w_button.dart';
 import 'package:tajjang/widgets/w_custom_switch.dart';
+import 'package:tajjang/widgets/w_image_button.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -10,7 +12,7 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F9F9),
+      backgroundColor: const Color(0xFFF8F6EE),
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
@@ -24,17 +26,13 @@ class SettingsPage extends StatelessWidget {
             ),
             leading: IconButton(
               icon: const HugeIcon(icon: HugeIcons.strokeRoundedArrowDown01, color: Colors.black, size: 32),
-              onPressed: () {
-                // TODO: Implement settings functionality
-              },
+              onPressed: () => Get.back(),
             ),
             title: const Text(
               'Settings',
               style: TextStyle(
                 color: Color(0xFF141C23),
                 fontSize: 18,
-                fontFamily: 'Be Vietnam Pro',
-                fontWeight: FontWeight.w700,
               ),
             ),
             centerTitle: true,
@@ -56,6 +54,12 @@ class SettingsPage extends StatelessWidget {
                 }),
                 _buildSoundSection(),
                 _buildBackToGameButton(),
+                AnimatedImageButton(
+                  imagePath: 'assets/your_image.png',
+                  onPressed: () {
+                    print('Button pressed!');
+                  },
+                )
               ],
             ),
           ),

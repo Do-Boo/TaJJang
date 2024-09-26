@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:tajjang/widgets/w_button.dart';
 
@@ -8,7 +9,7 @@ class MainPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF7FAFA),
+      backgroundColor: const Color(0xFFF8F6EE),
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
@@ -22,9 +23,7 @@ class MainPage extends StatelessWidget {
             ),
             leading: IconButton(
               icon: const HugeIcon(icon: HugeIcons.strokeRoundedArrowDown01, color: Colors.black, size: 32),
-              onPressed: () {
-                // TODO: Implement settings functionality
-              },
+              onPressed: () => Get.toNamed('/login'),
             ),
           ),
           SliverList(
@@ -53,6 +52,7 @@ class MainPage extends StatelessWidget {
   Widget _buildProfile() {
     return Container(
       width: double.infinity,
+      color: const Color(0xFFF8F6EE),
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
@@ -73,8 +73,6 @@ class MainPage extends StatelessWidget {
             style: TextStyle(
               color: Color(0xFF141C23),
               fontSize: 22,
-              fontFamily: 'Be Vietnam Pro',
-              fontWeight: FontWeight.w700,
             ),
           ),
           const Text(
@@ -82,8 +80,6 @@ class MainPage extends StatelessWidget {
             style: TextStyle(
               color: Color(0xFF3F5472),
               fontSize: 16,
-              fontFamily: 'Be Vietnam Pro',
-              fontWeight: FontWeight.w400,
             ),
           ),
         ],
@@ -94,7 +90,7 @@ class MainPage extends StatelessWidget {
   Widget _buildQuest(String title, String description) {
     return Button(
       padding: EdgeInsets.zero,
-      onPressed: () {},
+      onPressed: () => Get.toNamed('/typing_test_launch'),
       color: Colors.transparent,
       child: Container(
         width: double.infinity,
@@ -120,8 +116,6 @@ class MainPage extends StatelessWidget {
               style: const TextStyle(
                 color: Color(0xFF141C23),
                 fontSize: 18,
-                fontFamily: 'Be Vietnam Pro',
-                fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(height: 4),
@@ -131,8 +125,6 @@ class MainPage extends StatelessWidget {
                 style: const TextStyle(
                   color: Color(0xFF3F5472),
                   fontSize: 16,
-                  fontFamily: 'Be Vietnam Pro',
-                  fontWeight: FontWeight.w400,
                 ),
               ),
             ),

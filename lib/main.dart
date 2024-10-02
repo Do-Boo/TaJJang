@@ -17,7 +17,7 @@ class TaJJangApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      initialRoute: '/main',
+      initialRoute: '/word_typing_test',
       getPages: [
         GetPage(name: '/settings', page: () => const SettingsPage(), transition: Transition.downToUp),
         GetPage(name: '/main', page: () => const MainPage(), transition: Transition.downToUp),
@@ -27,7 +27,7 @@ class TaJJangApp extends StatelessWidget {
         GetPage(name: '/profile_settings', page: () => const ProfileSettingsPage(), transition: Transition.downToUp),
       ],
       theme: ThemeData(
-        fontFamily: '수박멜론',
+        fontFamily: '나눔고딕',
         textTheme: const TextTheme(
           bodyLarge: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
           bodyMedium: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),

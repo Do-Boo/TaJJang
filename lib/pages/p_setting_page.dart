@@ -1,249 +1,262 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hugeicons/hugeicons.dart';
 import 'package:tajjang/widgets/w_button.dart';
-import 'package:tajjang/widgets/w_custom_switch.dart';
-import 'package:tajjang/widgets/w_image_button.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class SettingsPage extends StatelessWidget {
-  const SettingsPage({super.key});
+class SettingsPage extends StatefulWidget {
+  final Function(String)? onModeChanged;
+  final Function(int)? onWordCountChanged;
+  final Function(String)? onLanguageChanged;
+  final Function(int)? onTargetSpeedChanged;
+
+  const SettingsPage({
+    super.key,
+    this.onModeChanged,
+    this.onWordCountChanged,
+    this.onLanguageChanged,
+    this.onTargetSpeedChanged,
+  });
+
+  @override
+  _SettingsPageState createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  late String _mode;
+  late int _wordCount;
+  late String _language;
+  late int _targetSpeed;
+  bool _settingsChanged = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _mode = prefs.getString('mode') ?? '단어';
+      _wordCount = prefs.getInt('wordCount') ?? 20;
+      _language = prefs.getString('language') ?? '영어';
+      _targetSpeed = prefs.getInt('targetSpeed') ?? 200;
+    });
+  }
+
+  Future<void> _saveSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('mode', _mode);
+    await prefs.setInt('wordCount', _wordCount);
+    await prefs.setString('language', _language);
+    await prefs.setInt('targetSpeed', _targetSpeed);
+    _settingsChanged = false;
+  }
+
+  void _updateSetting(Function() updateFunction) {
+    setState(() {
+      updateFunction();
+      _settingsChanged = true;
+    });
+  }
+
+  Future<bool> _onWillPop() async {
+    if (_settingsChanged) {
+      return await _showSaveConfirmationDialog() ?? false;
+    }
+    return true;
+  }
+
+  Future<bool?> _showSaveConfirmationDialog() {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1E1E1E),
+        title: const Text('설정 저장', style: TextStyle(color: Colors.white)),
+        content: const Text('변경된 설정을 저장하시겠습니까?', style: TextStyle(color: Colors.white)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('아니오', style: TextStyle(color: Color(0xFF4CAF50))),
+          ),
+          TextButton(
+            onPressed: () async {
+              await _saveSettings();
+              Navigator.of(context).pop(true);
+            },
+            child: const Text('예', style: TextStyle(color: Color(0xFF4CAF50))),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8F6EE),
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            pinned: false,
-            flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                color: Colors.transparent,
-              ),
-            ),
-            leading: IconButton(
-              icon: const HugeIcon(icon: HugeIcons.strokeRoundedArrowDown01, color: Colors.black, size: 32),
-              onPressed: () => Get.back(),
-            ),
-            title: const Text(
-              'Settings',
-              style: TextStyle(
-                color: Color(0xFF141C23),
-                fontSize: 18,
-              ),
-            ),
-            centerTitle: true,
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        backgroundColor: const Color(0xFF121212),
+        appBar: AppBar(
+          backgroundColor: const Color(0xFF1E1E1E),
+          elevation: 0,
+          leading: IconButton(
+            icon: const HugeIcon(icon: HugeIcons.strokeRoundedArrowLeft01, color: Colors.white, size: 24),
+            onPressed: () => Get.back(),
           ),
-          SliverList(
-            delegate: SliverChildListDelegate(
-              [
-                _buildSettingsItem('Account', HugeIcons.strokeRoundedUserCircle, onTap: () {
-                  // TODO: Implement account settings action
-                }),
-                _buildSettingsItem('Learning Goal', HugeIcons.strokeRoundedBounceRight, onTap: () {
-                  // TODO: Implement learning goal settings action
-                }),
-                _buildSettingsItem('Theme', HugeIcons.strokeRoundedMoon02, value: 'Light', onTap: () {
-                  // TODO: Implement theme settings action
-                }),
-                _buildSettingsItem('Language', HugeIcons.strokeRoundedGlobe02, value: 'English', onTap: () {
-                  // TODO: Implement language settings action
-                }),
-                _buildSoundSection(),
+          title: const Text(
+            'Settings',
+            style: TextStyle(color: Colors.white, fontSize: 18),
+          ),
+          centerTitle: true,
+        ),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSettingsItem('Mode', _mode, _buildModeDropdown),
+                _buildSettingsItem('Word Count', '$_wordCount ${_mode == '단어' ? '단어' : '문장'}', _buildWordCountDropdown),
+                _buildSettingsItem('Language', _language, _buildLanguageDropdown),
+                _buildSettingsItem('Target Speed', '$_targetSpeed 타/분', _buildTargetSpeedSlider),
+                const SizedBox(height: 24),
                 _buildBackToGameButton(),
-                AnimatedImageButton(
-                  imagePath: 'assets/your_image.png',
-                  onPressed: () {
-                    print('Button pressed!');
-                  },
-                )
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSettingsItem(String title, IconData icon, {String? value, VoidCallback? onTap}) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        height: 56,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Row(
-          children: [
-            _buildIconContainer(icon),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Text(
-                title,
-                style: const TextStyle(
-                  color: Color(0xFF141C23),
-                  fontSize: 16,
-                  fontFamily: 'Be Vietnam Pro',
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-            ),
-            if (value != null)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE2E8F2),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Text(
-                  value,
-                  style: const TextStyle(
-                    color: Color(0xFF141C23),
-                    fontSize: 14,
-                    fontFamily: 'Be Vietnam Pro',
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              )
-            else
-              const HugeIcon(icon: HugeIcons.strokeRoundedArrowRight01, size: 24, color: Color(0xFF141C23)),
-          ],
         ),
       ),
     );
   }
 
-  Widget _buildSettingsItemWithSwitch(String title, IconData icon) {
-    return Container(
-      height: 56,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        children: [
-          _buildIconContainer(icon),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Text(
-              title,
-              style: const TextStyle(
-                color: Color(0xFF141C23),
-                fontSize: 16,
-                fontFamily: 'Be Vietnam Pro',
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-          ),
-          Switch(
-            value: false, // TODO: Implement switch state
-            onChanged: (bool value) {
-              // TODO: Implement switch functionality
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSoundSection() {
+  Widget _buildSettingsItem(String title, String value, Widget Function() buildWidget) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.only(left: 16, top: 20, bottom: 12),
-          child: Text(
-            'Sound',
-            style: TextStyle(
-              color: Color(0xFF141C23),
-              fontSize: 22,
-              fontFamily: 'Be Vietnam Pro',
-              fontWeight: FontWeight.w700,
-            ),
-          ),
+        Text(
+          title,
+          style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
         ),
-        _buildSoundItem('Music', HugeIcons.strokeRoundedMusicNote03),
-        _buildSoundItem('Sound Effects', HugeIcons.strokeRoundedVolumeHigh),
+        const SizedBox(height: 8),
+        buildWidget(),
+        const SizedBox(height: 24),
       ],
     );
   }
 
-  Widget _buildSoundItem(String title, IconData icon) {
-    return Container(
-      height: 72,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        children: [
-          _buildIconContainer(icon, size: 48),
-          const SizedBox(width: 16),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  color: Color(0xFF141C23),
-                  fontSize: 16,
-                  fontFamily: 'Be Vietnam Pro',
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const Text(
-                'On',
-                style: TextStyle(
-                  color: Color(0xFF3F5472),
-                  fontSize: 14,
-                  fontFamily: 'Be Vietnam Pro',
-                  fontWeight: FontWeight.w400,
-                ),
-              ),
-            ],
-          ),
-          const Spacer(),
-          CustomSwitch(
-            value: true, // TODO: Implement switch state
-            onChanged: (bool value) {
-              // TODO: Implement switch functionality
-            },
-          ),
-        ],
-      ),
+  Widget _buildModeDropdown() {
+    return DropdownButton<String>(
+      value: _mode,
+      dropdownColor: const Color(0xFF2C2C2C),
+      isExpanded: true,
+      items: ['단어', '문장'].map((String value) {
+        return DropdownMenuItem<String>(
+          value: value,
+          child: Text(value, style: const TextStyle(color: Colors.white)),
+        );
+      }).toList(),
+      onChanged: (String? newValue) {
+        if (newValue != null) {
+          _updateSetting(() {
+            _mode = newValue;
+            widget.onModeChanged?.call(newValue);
+          });
+        }
+      },
+    );
+  }
+
+  Widget _buildWordCountDropdown() {
+    return DropdownButton<int>(
+      value: _wordCount,
+      dropdownColor: const Color(0xFF2C2C2C),
+      isExpanded: true,
+      items: [10, 20, 30, 40, 50].map((int value) {
+        return DropdownMenuItem<int>(
+          value: value,
+          child: Text('$value ${_mode == '단어' ? '단어' : '문장'}', style: const TextStyle(color: Colors.white)),
+        );
+      }).toList(),
+      onChanged: (int? newValue) {
+        if (newValue != null) {
+          _updateSetting(() {
+            _wordCount = newValue;
+            widget.onWordCountChanged?.call(newValue);
+          });
+        }
+      },
+    );
+  }
+
+  Widget _buildLanguageDropdown() {
+    return DropdownButton<String>(
+      value: _language,
+      dropdownColor: const Color(0xFF2C2C2C),
+      isExpanded: true,
+      items: ['영어', '한국어'].map((String value) {
+        return DropdownMenuItem<String>(
+          value: value,
+          child: Text(value, style: const TextStyle(color: Colors.white)),
+        );
+      }).toList(),
+      onChanged: (String? newValue) {
+        if (newValue != null) {
+          _updateSetting(() {
+            _language = newValue;
+            widget.onLanguageChanged?.call(newValue);
+          });
+        }
+      },
+    );
+  }
+
+  Widget _buildTargetSpeedSlider() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('목표 타수: $_targetSpeed 타/분', style: const TextStyle(color: Colors.white)),
+        Slider(
+          value: _targetSpeed.toDouble(),
+          min: 100,
+          max: 500,
+          divisions: 40,
+          label: _targetSpeed.round().toString(),
+          activeColor: const Color(0xFF4CAF50),
+          inactiveColor: const Color(0xFF2C2C2C),
+          onChanged: (double newValue) {
+            _updateSetting(() {
+              _targetSpeed = newValue.round();
+              widget.onTargetSpeedChanged?.call(newValue.round());
+            });
+          },
+        ),
+      ],
     );
   }
 
   Widget _buildBackToGameButton() {
-    return Container(
+    return SizedBox(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Button(
-        color: const Color(0xFFE2E8F2),
-        borderRadius: BorderRadius.circular(24),
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        onPressed: () {
-          // TODO: Implement back to game functionality
+      height: 40,
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF2C2C2C),
+        ),
+        onPressed: () async {
+          if (_settingsChanged) {
+            final shouldSave = await _showSaveConfirmationDialog();
+            if (shouldSave == true) {
+              await _saveSettings();
+            }
+          }
+          Get.back();
         },
         child: const Text(
           'Back to Game',
-          style: TextStyle(
-            color: Color(0xFF141C23),
-            fontSize: 16,
-            fontFamily: 'Be Vietnam Pro',
-            fontWeight: FontWeight.w700,
-          ),
+          style: TextStyle(color: Color(0xFF4CAF50), fontSize: 16),
         ),
-      ),
-    );
-  }
-
-  Widget _buildIconContainer(IconData icon, {double size = 40}) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: const Color(0xFFE2E8F2),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Center(
-        child: HugeIcon(icon: icon, size: 24, color: const Color(0xFF141C23)),
       ),
     );
   }

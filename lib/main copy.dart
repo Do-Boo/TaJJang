@@ -1,10 +1,8 @@
-import 'dart:math' as math;
+import 'dart:math';
 import 'package:flutter/material.dart';
-import 'widgets/w_button1.dart';
+import 'package:flutter/scheduler.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -12,31 +10,51 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Scaffold(
-        body: Container(
-          decoration: const BoxDecoration(
-              // gradient: LinearGradient(
-              //   begin: Alignment.topCenter,
-              //   end: Alignment.bottomCenter,
-              //   colors: [
-              //     Color.fromARGB(255, 208, 236, 224), // 밝은 색상
-              //     Color(0xFFC1D6CD), // 어두운 색상
-              //   ],
-              // ),
-              // image: DecorationImage(
-              //   image: AssetImage("assets/images/background.png"), // 배경 이미지 파일 경로
-              //   fit: BoxFit.cover,
-              // ),
-              ),
-          child: Center(
-            child: CustomRoundedButton(
-              size: const Size(200, 50),
-              child: const Text(
-                'Click me',
-                style: TextStyle(fontFamily: '금은보화', fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              onPressed: () {},
-            ),
+      title: 'Flutter 3D Frame Demo',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: const Cube3DDemo(),
+    );
+  }
+}
+
+class Cube3DDemo extends StatefulWidget {
+  const Cube3DDemo({super.key});
+
+  @override
+  _Cube3DDemoState createState() => _Cube3DDemoState();
+}
+
+class _Cube3DDemoState extends State<Cube3DDemo> with SingleTickerProviderStateMixin {
+  late Ticker _ticker;
+  double _angle = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _ticker = createTicker((elapsed) {
+      setState(() {
+        _angle += 0.02;
+      });
+    });
+    _ticker.start();
+  }
+
+  @override
+  void dispose() {
+    _ticker.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('3D Cube Frame Demo')),
+      body: Center(
+        child: SizedBox(
+          width: 300,
+          height: 300,
+          child: CustomPaint(
+            painter: CubePainter(_angle),
           ),
         ),
       ),
@@ -44,79 +62,92 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class CustomRoundedButton extends StatefulWidget {
-  final Widget child;
-  final VoidCallback onPressed;
-  final Size size;
+class CubePainter extends CustomPainter {
+  final double angle;
 
-  const CustomRoundedButton({super.key, required this.child, required this.onPressed, required this.size});
+  CubePainter(this.angle);
 
   @override
-  _CustomRoundedButtonState createState() => _CustomRoundedButtonState();
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final side = size.width * 0.5;
+
+    final vertices = [
+      Vector3(-1, -1, -1),
+      Vector3(1, -1, -1),
+      Vector3(1, 1, -1),
+      Vector3(-1, 1, -1),
+      Vector3(-1, -1, 1),
+      Vector3(1, -1, 1),
+      Vector3(1, 1, 1),
+      Vector3(-1, 1, 1),
+    ];
+
+    final rotationMatrix = Matrix4.rotationY(angle) * Matrix4.rotationX(angle * 0.7);
+
+    final projectedVertices = vertices.map((v) {
+      var rotated = rotationMatrix.transform3(v);
+      var scaled = Vector3(rotated.x * side, rotated.y * side, rotated.z);
+      return Offset(scaled.x + center.dx, scaled.y + center.dy);
+    }).toList();
+
+    final paint = Paint()
+      ..color = Colors.blue
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+
+    // Draw edges
+    canvas.drawLine(projectedVertices[0], projectedVertices[1], paint);
+    canvas.drawLine(projectedVertices[1], projectedVertices[2], paint);
+    canvas.drawLine(projectedVertices[2], projectedVertices[3], paint);
+    canvas.drawLine(projectedVertices[3], projectedVertices[0], paint);
+
+    canvas.drawLine(projectedVertices[4], projectedVertices[5], paint);
+    canvas.drawLine(projectedVertices[5], projectedVertices[6], paint);
+    canvas.drawLine(projectedVertices[6], projectedVertices[7], paint);
+    canvas.drawLine(projectedVertices[7], projectedVertices[4], paint);
+
+    canvas.drawLine(projectedVertices[0], projectedVertices[4], paint);
+    canvas.drawLine(projectedVertices[1], projectedVertices[5], paint);
+    canvas.drawLine(projectedVertices[2], projectedVertices[6], paint);
+    canvas.drawLine(projectedVertices[3], projectedVertices[7], paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => true;
 }
 
-class _CustomRoundedButtonState extends State<CustomRoundedButton> {
-  bool _isPressed = false;
+class Vector3 {
+  final double x, y, z;
+  Vector3(this.x, this.y, this.z);
+}
 
-  void _setPressed(bool isPressed) {
-    if (mounted) {
-      setState(() {
-        _isPressed = isPressed;
-      });
-    }
-  }
+class Matrix4 {
+  final List<double> values;
 
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: widget.size.width,
-      height: widget.size.height,
-      child: GestureDetector(
-        onTapDown: (_) => _setPressed(true),
-        onTapUp: (_) => _setPressed(false),
-        onTapCancel: () => _setPressed(false),
-        onTap: widget.onPressed,
-        child: TweenAnimationBuilder<double>(
-            duration: const Duration(milliseconds: 100),
-            tween: Tween(begin: 1.0, end: _isPressed ? 0.95 : 1.0),
-            builder: (context, scale, child) {
-              return Transform.scale(
-                scale: scale,
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(widget.size.height * 0.4),
-                    border: Border.all(color: const Color(0xff975947), width: 2),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        offset: const Offset(0, 5),
-                        blurRadius: 2,
-                      ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 3, top: 3),
-                    child: Container(
-                      padding: const EdgeInsets.only(bottom: 3, right: 3),
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular((widget.size.height - 3) * 0.4),
-                        gradient: const LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            Color(0xFFE1F6ED), // 밝은 색상
-                            Color(0xFFC1D6CD), // 어두운 색상
-                          ],
-                        ),
-                      ),
-                      child: widget.child,
-                    ),
-                  ),
-                ),
-              );
-            }),
-      ),
+  Matrix4.rotationY(double angle) : values = [cos(angle), 0, sin(angle), 0, 0, 1, 0, 0, -sin(angle), 0, cos(angle), 0, 0, 0, 0, 1];
+
+  Matrix4.rotationX(double angle) : values = [1, 0, 0, 0, 0, cos(angle), -sin(angle), 0, 0, sin(angle), cos(angle), 0, 0, 0, 0, 1];
+
+  Vector3 transform3(Vector3 v) {
+    return Vector3(
+      values[0] * v.x + values[1] * v.y + values[2] * v.z,
+      values[4] * v.x + values[5] * v.y + values[6] * v.z,
+      values[8] * v.x + values[9] * v.y + values[10] * v.z,
     );
   }
+
+  Matrix4 operator *(Matrix4 other) {
+    var result = List<double>.filled(16, 0);
+    for (var i = 0; i < 4; i++) {
+      for (var j = 0; j < 4; j++) {
+        for (var k = 0; k < 4; k++) {
+          result[i * 4 + j] += values[i * 4 + k] * other.values[k * 4 + j];
+        }
+      }
+    }
+    return Matrix4._fromList(result);
+  }
+
+  Matrix4._fromList(this.values);
 }

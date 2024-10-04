@@ -37,6 +37,32 @@ class _WordTypingTestPageState extends State<WordTypingTestPage> {
   int _targetSpeed = 200;
   String _mode = '단어'; // '단어' 또는 '문장'
 
+  final String _lastCompletedInput = '';
+  List<String> _decomposedCurrentWord = [];
+  List<String> _decomposedInput = [];
+
+  // 한글 자모음 분리 함수
+  List<String> decomposeKorean(String text) {
+    List<String> result = [];
+    for (int i = 0; i < text.length; i++) {
+      int charCode = text.codeUnitAt(i);
+      if (charCode >= 0xAC00 && charCode <= 0xD7A3) {
+        int baseCode = charCode - 0xAC00;
+        int chosung = baseCode ~/ (21 * 28);
+        int jungsung = (baseCode % (21 * 28)) ~/ 28;
+        int jongsung = baseCode % 28;
+        result.add(String.fromCharCode(0x1100 + chosung));
+        result.add(String.fromCharCode(0x1161 + jungsung));
+        if (jongsung > 0) {
+          result.add(String.fromCharCode(0x11A7 + jongsung));
+        }
+      } else {
+        result.add(text[i]);
+      }
+    }
+    return result;
+  }
+
   static final List<String> _koreanSentences = [
     '매일 아침 일어나면 감사한 마음으로 하루를 시작합니다',
     '어려움이 있어도 포기하지 않고 끝까지 도전하는 것이 중요합니다',
@@ -57,9 +83,9 @@ class _WordTypingTestPageState extends State<WordTypingTestPage> {
     '새로운 기술을 배우는 것은 우리의 미래를 준비하는 일입니다',
     '가족과 친구들과의 소중한 추억을 많이 만들어 가세요',
     '어려운 상황에서도 희망을 잃지 않는 것이 중요합니다',
-    '매일 조금씩 성장하다 보면 큰 변화를 이룰 수 있습니다',
+    '매일 조금씩 성장하다 보면 큰 변를 이룰 수 있습니다',
     '타인을 이해하고 공감하는 능력이 좋은 관계를 만듭니다',
-    '자신을 사랑하고 존중하는 것에서 모든 행복이 시작됩니다',
+    '��신을 사랑하고 존중하는 것에서 모든 행복이 시작됩니다',
     '환경을 생각하는 작은 실천들이 지구를 지킬 수 있습니다',
     '어린 시절의 꿈을 잊지 말고 그것을 향해 나아가세요',
     '서로 다른 의견을 존중하며 대화하는 것이 중요합니다',
@@ -87,7 +113,7 @@ class _WordTypingTestPageState extends State<WordTypingTestPage> {
     '다른 사람의 장점을 발견하고 칭찬하는 습관을 가져보세요',
     '스트레스 관리는 행복하고 건강한 삶을 위해 꼭 필요합니다',
     '어려운 시기를 겪을 때 가족의 소중함을 더 깊이 느낍니다',
-    '자신의 감정을 솔직하게 표현하는 것도 중요한 능력입니다',
+    '자신의 감정 솔직하게 표현하는 것도 중요한 능력입니다',
     '작은 목표를 세우고 달성해 나가면서 성취감을 느껴보세요',
     '타인의 의견을 경청하는 자세가 좋은 관계의 시작입니다',
     '자신의 직업에 자부심을 갖고 최선을 다하는 것이 중요합니다',
@@ -105,7 +131,7 @@ class _WordTypingTestPageState extends State<WordTypingTestPage> {
     '자신의 꿈을 위해 지금 당장 할 수 있는 일부터 시작하세요',
     '타인의 성공 스토리에서 영감을 얻고 동기 부여를 받으세요',
     '매일 조금씩 자신을 개선하려는 노력이 큰 변화를 만듭니다',
-    '긍정적인 자기 대화는 자신감과 성취감을 높여줍니다',
+    '긍정적인 자기 대화는 자신감과 성취감을 여���다',
     '다양한 경험을 통해 자신의 잠재력을 발견할 수 있습니다',
     '타인의 의견을 존중하면서도 자신의 신념을 지키는 것이 중요합니다',
     '실패를 두려워하지 말고 그것을 배움의 기회로 삼으세요',
@@ -121,10 +147,10 @@ class _WordTypingTestPageState extends State<WordTypingTestPage> {
     '꾸준한 노력이 재능보다 더 중요하다는 것을 믿으세요',
     '다른 사람의 생각을 존중하면서도 자신의 의견을 표현하세요',
     '자신의 건강을 위해 규칙적인 생활 습관을 만들어 보세요',
-    '어려운 상황에서도 긍정적인 면을 찾으려고 노력하세요',
+    '어려운 상황에서도 긍정적인 면을 찾으려고 노력세요',
     '타인을 돕는 과정에서 자신도 성장할 수 있음을 기억하세요',
     '자신의 직관을 믿고 그에 따라 행동하는 용기를 가지세요',
-    '새로운 기술을 배우는 것은 미래를 위한 투자입니다',
+    '새로운 기술을 배우 것은 미래를 위한 투자입니다',
     '다양한 문화를 이해하고 존중하는 태도를 갖추세요',
     '자신의 감정을 솔직하게 표현하되 상대방을 배려하세요',
     '어려운 시기를 겪을 때 주변의 도움을 받아들이세요',
@@ -136,7 +162,7 @@ class _WordTypingTestPageState extends State<WordTypingTestPage> {
     '어려운 결정 앞에서도 자신의 가치관을 지키는 것이 중요합니다',
     '타인의 감정을 이해하고 공감하는 능력을 키워보세요',
     '자신의 열정을 찾고 그것을 위해 노력하는 삶을 살아가세요',
-    '새로운 도전을 통해 자신의 한계를 뛰어넘어 보세요',
+    '새로운 도전을 통해 자신의 한계를 어넘어 보세요',
     '다양한 경험이 우리의 시야를 넓히고 성장시킵니다',
     '자신의 강점을 발견하고 그것을 활용하는 방법을 찾아보세요',
     '어려운 상황에서도 희망을 잃지 않는 것이 중요합니다',
@@ -166,7 +192,7 @@ class _WordTypingTestPageState extends State<WordTypingTestPage> {
     '어려운 시기를 겪을 때 주변 사람들의 도움을 받아들이세요',
     '타인의 성공을 축하해 줄 줄 아는 넓은 마음을 가지세요',
     '자신의 직관을 믿고 그에 따라 행동하는 용기를 가지세요',
-    '새로운 기술을 배우는 것은 미래를 위한 투자입니다',
+    '새로운 기술을 배우 것은 미래를 위한 투자입니다',
     '다양한 문화를 이해하고 존중하는 태도를 갖추세요',
     '자신의 꿈을 향해 한 걸음씩 나아가는 인내심이 필요합니다',
     '어려운 상황에서도 긍정적인 마인드를 유지하세요',
@@ -416,46 +442,70 @@ class _WordTypingTestPageState extends State<WordTypingTestPage> {
       _isCurrentWordStarted = true;
       _wordStopwatch.reset();
       _wordStopwatch.start();
+      _decomposedCurrentWord = decomposeKorean(currentWord);
     }
 
-    _totalTypedCharacters = value.length;
-    _correctCharacters = 0;
+    _decomposedInput = decomposeKorean(value);
 
-    for (int i = 0; i < value.length && i < currentWord.length; i++) {
-      if (value[i] == currentWord[i]) {
-        _correctCharacters++;
+    int correctJamo = 0;
+    int lastCorrectIndex = -1;
+
+    for (int i = 0; i < _decomposedInput.length && i < _decomposedCurrentWord.length; i++) {
+      if (_decomposedInput[i] == _decomposedCurrentWord[i]) {
+        correctJamo++;
+        lastCorrectIndex = i;
       }
     }
 
+    _totalTypedCharacters = _decomposedInput.length;
+    _correctCharacters = correctJamo;
+
     if (_isCurrentWordStarted) {
-      _currentWordSpeed = (value.length * 60) / (_wordStopwatch.elapsedMilliseconds / 1000);
+      double elapsedSeconds = _wordStopwatch.elapsedMilliseconds / 1000;
+
+      // 마지막으로 정확하게 입력한 자모까지의 시간을 계산
+      double correctElapsedSeconds = (lastCorrectIndex + 1) * elapsedSeconds / _decomposedInput.length;
+
+      // 정확하게 입력한 자모 수에 대한 속도 계산
+      _currentWordSpeed = (correctJamo * 60) / correctElapsedSeconds;
     }
 
-    setState(() {}); // 상태 업데이트를 위해 추가
+    setState(() {}); // 상태 업데이트
 
     // 문장 모드일 때는 문장 길이만큼 입력되면 다음으로 넘어가도록 수정
     if (_mode == '문장') {
-      if (value.length >= currentWord.length) {
+      if (_decomposedInput.length >= _decomposedCurrentWord.length) {
         _moveToNextWord(value);
       }
     } else {
       // 단어 모드일 때는 기존 로직 유지
-      if (value.length >= currentWord.length || value.endsWith(' ')) {
+      if (_decomposedInput.length >= _decomposedCurrentWord.length || value.endsWith(' ')) {
         _moveToNextWord(value);
       }
     }
   }
 
   void _moveToNextWord(String value) {
-    if (value.trim() == _words[_currentWordIndex]) {
+    int correctJamo = 0;
+    for (int i = 0; i < _decomposedInput.length && i < _decomposedCurrentWord.length; i++) {
+      if (_decomposedInput[i] == _decomposedCurrentWord[i]) {
+        correctJamo++;
+      }
+    }
+
+    if (correctJamo == _decomposedCurrentWord.length) {
       _totalCorrectWords++;
-      _wordSpeeds.add(_currentWordSpeed);
     } else {
       _totalErrorWords++;
     }
+
+    _wordSpeeds.add(_currentWordSpeed);
+
     _textController.clear();
     _isCurrentWordStarted = false;
     _isNewWord = true;
+    _decomposedInput.clear();
+    _decomposedCurrentWord.clear();
     setState(() {
       _currentWordIndex++;
       if (_currentWordIndex >= _words.length) {
